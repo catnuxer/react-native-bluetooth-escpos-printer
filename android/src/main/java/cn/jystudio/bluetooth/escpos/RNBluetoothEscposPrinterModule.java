@@ -405,13 +405,45 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
 
             byte[] data = PrintPicture.POS_PrintBMP(bitmap, size, 0);
             if (sendDataByte(data)) {
-                promise.resolve(null);
+                promise.resolve(true);
             } else {
                 promise.reject("COMMAND_NOT_SEND");
             }
         } catch (Exception e) {
             promise.reject(e.getMessage(), e);
         }
+    }
+
+    @ReactMethod
+    public void writePrintCode(String data, final Promise response)
+    {
+      try {
+        if (data==null || mService.getState() != BluetoothService.STATE_CONNECTED) {
+            response.reject("Can not write to printer");
+        }
+        mService.write(data.getBytes());
+        response.resolve(data);
+      } catch (Exception e) {
+        response.reject(e.getMessage(), e);
+      }
+    }
+
+    @ReactMethod
+    public void printPdf417(String data, int column, int width, int height){
+      byte[] command1 = PrinterCommand.getColumDataRegionPdf417(column);
+      sendDataByte(command1);
+
+      byte[] command2 = PrinterCommand.getWidthModulePdf417(width);
+      sendDataByte(command2);
+
+      byte[] command3 = PrinterCommand.getRowHeightPdf417(height);
+      sendDataByte(command3);
+
+      byte[] command4 = PrinterCommand.getStoreDataPdf417(data);
+      sendDataByte(command4);
+
+      byte[] command5 = PrinterCommand.getPrintSymbolData();
+      sendDataByte(command5);
     }
 
     @ReactMethod
@@ -425,6 +457,7 @@ public class RNBluetoothEscposPrinterModule extends ReactContextBaseJavaModule
         if (data==null || mService.getState() != BluetoothService.STATE_CONNECTED) {
             return false;
         }
+        Log.d("MyTagGoesHere", "This is my log message at the debug level here");
         mService.write(data);
         return true;
     }

@@ -440,6 +440,123 @@ public class PrinterCommand {
     }
 
     /**
+     * Pdf 417
+     */
+    //Step 1
+    public static byte[] getColumDataRegionPdf417(int column) {
+
+        byte[] command = new byte[8];
+
+        command[0] = 29;
+        command[1] = 40;
+        command[2] = 107;
+        command[3] = 3;
+        command[4] = 0;
+        command[5] = 48;
+        command[6] = 65;
+        command[7] = ((byte) column);
+
+        return command;
+    }
+
+    //Step 2
+
+    public static byte[] getWidthModulePdf417(int width) {
+      byte[] command = new byte[11];
+
+      command[0] = 29;
+      command[1] = 40;
+      command[2] = 107;
+      command[3] = 3;
+      command[4] = 0;
+      command[5] = 48;
+      command[6] = 67;
+      command[7] = ((byte) width);
+
+      return command;
+    }
+
+    public static byte[] getRowHeightPdf417(int height) {
+
+        byte[] command = new byte[11];
+
+        command[0] = 29;
+        command[1] = 40;
+        command[2] = 107;
+        command[3] = 3;
+        command[4] = 0;
+        command[5] = 48;
+        command[6] = 68;
+        command[7] = ((byte) height);
+
+        return command;
+    }
+
+    //Step 3
+    public static byte[] getStoreDataPdf417(String data) {
+
+      byte[] bCodeData = null;
+      try {
+          bCodeData = data.getBytes("GBK");
+
+      } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+          return null;
+      }
+
+      byte[] command = new byte[bCodeData.length + 8];
+
+      byte[] pl = getPlph(data.length()+3);
+
+      command[0] = 29;
+      command[1] = 40;
+      command[2] = 107;
+      command[3] = pl[0];
+      command[4] = pl[1];
+      command[5] = 48;
+      command[6] = 80;
+      command[7] = 48;
+      System.arraycopy(bCodeData, 0, command, 8, bCodeData.length);
+      return command;
+
+    }
+
+    public static byte[] getPlph(int ln) {
+      int result;
+      int a = ln;
+      byte[] temp = new byte[2];
+      int b=0;
+      while (a > 0) {
+        temp[b] = ((byte) (a % 256));
+        b++;
+        a = ((byte) Math.floor(a/256));
+      }
+      if(temp.length == 1) temp[1] = 0;
+      return temp;
+    }
+
+    //Step 4
+    public static byte[] getPrintSymbolData() {
+
+        byte[] command = new byte[8];
+
+        command[0] = 29;
+        command[1] = 40;
+        command[2] = 107;
+        command[3] = 3;
+        command[4] = 0;
+        command[5] = 48;
+        command[6] = 81;
+        command[7] = 48;
+
+        return command;
+    }
+
+
+
+
+
+    /**
      * 设置打印模式(选择字体(font:A font:B),加粗,字体倍高倍宽(最大4倍高宽))
      *
      * @param str        打印的字符串
